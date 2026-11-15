@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Happy Anniversary</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@1,500;1,600&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:dark;--cream:#fbf1da;--muted:#cfc5a8;box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html,body{margin:0;min-height:100%}
+body{background:#000;color:var(--cream);font-family:"Cormorant Garamond",Georgia,serif;
+  display:flex;flex-direction:column;align-items:center;min-height:100dvh;padding:2.5vh 12px 12px;
+  text-align:center;overflow-x:hidden;position:relative}
+h1{margin:0;font-style:italic;font-weight:600;font-size:clamp(2.2rem,8vw,4rem);line-height:1.1;min-height:1.15em;position:relative;z-index:1}
+.cur{animation:blink 1s steps(1) infinite;color:#ffc933}
+@keyframes blink{50%{opacity:0}}
+canvas{display:block;margin:1vh auto 0;position:relative;z-index:1}
+#note{margin:.4rem 0 0;font-style:italic;font-size:clamp(1.1rem,3.6vw,1.45rem);color:var(--muted);opacity:0;transition:opacity 2s;position:relative;z-index:1}
+#note.show{opacity:1}
+button{margin-top:.9rem;font:inherit;font-style:italic;font-size:1.1rem;color:var(--cream);background:transparent;
+  border:1px solid rgba(251,241,218,.4);border-radius:999px;padding:.3rem 1.3rem;cursor:pointer;position:relative;z-index:1}
+button:hover{background:rgba(251,241,218,.12)}
+button:focus-visible{outline:2px solid var(--cream);outline-offset:3px}
+.st{position:fixed;font-family:monospace;color:#fff;opacity:0;animation:tw 3s ease-in-out infinite;pointer-events:none}
+@keyframes tw{50%{opacity:.8}}
+@media (prefers-reduced-motion:reduce){.st,.cur{animation:none}.st{opacity:.4}#note{transition:none}}
+</style>
+</head>
+<body>
+<h1><span id="ttl"></span><span class="cur">_</span></h1>
+<canvas id="cv" role="img" aria-label="A bouquet of lilies and sunflowers, drawn in colored text, blooming"></canvas>
+<p id="note"></p>
+<button id="again" type="button">Bloom again</button>
+
+<script>
+(function(){
+  // ---- EDIT THESE TWO LINES ----
+  var TITLE="Happy Anniversary";
+  var NOTE ="Two months with you, and I’d pick every day again.";
+  // ------------------------------
+  var GW=110,GH=70,PI=Math.PI;
+  var reduce=window.matchMedia&&matchMedia("(prefers-reduced-motion:reduce)").matches;
+  var cv=document.getElementById("cv"),mc=cv.getContext("2d");
+  var off=document.createElement("canvas");off.width=GW;off.height=GH;
+  var oc=off.getContext("2d",{willReadFrequently:true});
+  var nz=new Float32Array(GW*GH).map(function(){return Math.random()*2-1;});
+  var RAMP=" .:-=+*#%@";
+  function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+  function ease(u){return 1-Math.pow(1-u,3);}
+
+  var FL=[
+    {k:"s",x:56,y:14,r:14,d:3.1},
+    {k:"s",x:26,y:42,r:19,d:2.2},
+    {k:"l",x:88,y:48,r:19,d:2.6,c:["#7a2f8e","#a24db5"],rot:.5},
+    {k:"l",x:56,y:42,r:27,d:1.8,c:["#c8141b","#ef3b2d"],rot:.1},
+    {k:"l",x:28,y:74,r:24,d:3.0,c:["#d838c8","#f58be8"],rot:-.5},
+    {k:"l",x:74,y:76,r:25,d:3.4,c:["#eae6df","#ffffff"],rot:.4},
+    {k:"s",x:15,y:102,r:16,d:3.8},
+    {k:"l",x:94,y:100,r:17,d:4.1,c:["#7a1010","#b3161a"],rot:-.3},
+    {k:"l",x:54,y:104,r:19,d:4.4,c:["#efe9e1","#fffaf5"],rot:.2}
+  ];
+
+  function lily(c,x,y,r,rot,col,b){
+    c.save();c.translate(x,y);c.rotate(rot);
+    if(b<.3){
+      c.fillStyle=col[1];c.beginPath();c.ellipse(0,-r*.2,r*.12+b*r*.2,r*.3+b*r*.7,0,0,7);c.fill();c.restore();return;
+    }
+    var o=(b-.3)/.7,L=r*(.45+.55*o),w=r*(.12+.16*o),pass,i,j;
+    for(pass=0;pass<2;pass++)for(i=0;i<3;i++){
+      c.save();c.rotate((i*120+(pass?0:60))*PI/180);
+      var L2=pass?L:L*.93,wl=pass?w:w*.85;
+      var g=c.createLinearGradient(0,0,0,-L2);
+      g.addColorStop(0,"#f1d95c");g.addColorStop(.22,col[1]);g.addColorStop(.75,col[1]);g.addColorStop(1,col[0]);
+      c.fillStyle=g;c.beginPath();c.moveTo(0,0);
+      c.bezierCurveTo(wl*1.4,-L2*.3,wl*1.2,-L2*.8,0,-L2);
+      c.bezierCurveTo(-wl*1.2,-L2*.8,-wl*1.4,-L2*.3,0,0);c.fill();
+      c.strokeStyle="rgba(0,0,0,.22)";c.lineWidth=.7;c.beginPath();c.moveTo(0,-L2*.1);c.lineTo(0,-L2*.75);c.stroke();
+      c.restore();
+    }
+    for(j=0;j<6;j++){
+      c.save();c.rotate((j*60+30)*PI/180);
+      c.strokeStyle="#8a2a14";c.lineWidth=.6;c.beginPath();c.moveTo(0,0);c.lineTo(0,-r*.34*o);c.stroke();
+      c.fillStyle="#e0902f";c.beginPath();c.arc(0,-r*.34*o,.9,0,7);c.fill();c.restore();
+    }
+    c.restore();
+  }
+
+  function sun(c,x,y,r,b){
+    c.save();c.translate(x,y);
+    if(b<.3){c.fillStyle="#7aa32f";c.beginPath();c.arc(0,0,r*(.15+b*.5),0,7);c.fill();c.restore();return;}
+    var o=(b-.3)/.7,cr=r*.4,i;
+    [[0,1,"#f59e0b","#ffc21a"],[.5,.86,"#ffb400","#ffd84a"]].forEach(function(ring){
+      var L=cr+(r*ring[1]-cr)*o,w=r*.15;
+      for(i=0;i<18;i++){
+        c.save();c.rotate((i+ring[0])*2*PI/18);
+        var g=c.createLinearGradient(0,-cr,0,-L);g.addColorStop(0,ring[2]);g.addColorStop(1,ring[3]);
+        c.fillStyle=g;c.beginPath();c.moveTo(0,-cr*.7);
+        c.quadraticCurveTo(w,-(cr+L)/2,0,-L);c.quadraticCurveTo(-w,-(cr+L)/2,0,-cr*.7);c.fill();c.restore();
+      }
+    });
+    var rd=cr*(.55+.45*o),dg=c.createRadialGradient(0,0,0,0,0,rd);
+    dg.addColorStop(0,"#7a4a1c");dg.addColorStop(1,"#2e1a0a");
+    c.fillStyle=dg;c.beginPath();c.arc(0,0,rd,0,7);c.fill();
+    c.fillStyle="#c18a34";
+    for(i=1;i<40;i++){var rr=rd*.92*Math.sqrt(i/40),a=i*2.39996;c.beginPath();c.arc(rr*Math.cos(a),rr*Math.sin(a),.7,0,7);c.fill();}
+    c.restore();
+  }
+
+  function scene(c,t){
+    var i,BX=55,BY=140;
+    // leaves
+    for(i=0;i<11;i++){
+      var p=ease(clamp((t-.1-i*.05)/1.2,0,1));if(p<=0)continue;
+      var f=i/10-.5,a=f*2*75*PI/180,L=(34+(1-Math.abs(f)*2)*14)*p;
+      var tx=BX+Math.sin(a)*L,ty=BY-Math.cos(a)*L*.9,mx=(BX+tx)/2,my=(BY+ty)/2,nx=Math.cos(a),ny=Math.sin(a),w=3.4*p;
+      var g=c.createLinearGradient(BX,BY,tx,ty);g.addColorStop(0,"#1f6b24");g.addColorStop(1,i%2?"#3fbf3f":"#2e9b34");
+      c.fillStyle=g;c.beginPath();c.moveTo(BX,BY);
+      c.quadraticCurveTo(mx+nx*w,my+ny*w,tx,ty);c.quadraticCurveTo(mx-nx*w,my-ny*w,BX,BY);c.fill();
+    }
+    // stems
+    c.strokeStyle="#2f8f3a";c.lineWidth=2.2;c.lineCap="round";
+    FL.forEach(function(fl){
+      var p=ease(clamp((t-Math.max(.3,fl.d-1.6))/1.4,0,1));if(p<=0)return;
+      var ex=fl.x,ey=fl.y+fl.r*.25,cx=BX+(fl.x-BX)*.3,cy=(BY+fl.y)/2,u;
+      c.beginPath();c.moveTo(BX,BY);
+      for(u=.05;u<=p+.001;u+=.05){var v=Math.min(u,p);
+        c.lineTo((1-v)*(1-v)*BX+2*(1-v)*v*cx+v*v*ex,(1-v)*(1-v)*BY+2*(1-v)*v*cy+v*v*ey);}
+      c.stroke();
+    });
+    // flowers
+    FL.forEach(function(fl,i){
+      var b=ease(clamp((t-fl.d)/1.8,0,1));if(b<=0)return;
+      var sx=reduce?0:Math.sin(t*.9+i*1.7)*.5*b;
+      if(fl.k==="s")sun(c,fl.x+sx,fl.y,fl.r,b);else lily(c,fl.x+sx,fl.y,fl.r,fl.rot,fl.c,b);
+    });
+  }
+
+  var cw=4,dpr=1;
+  function size(){
+    dpr=window.devicePixelRatio||1;
+    cw=Math.max(2,Math.min(innerWidth*.94/GW,(innerHeight-260)/140));
+    cv.style.width=GW*cw+"px";cv.style.height=GH*2*cw+"px";
+    cv.width=Math.round(GW*cw*dpr);cv.height=Math.round(GH*2*cw*dpr);
+  }
+  function render(t){
+    oc.clearRect(0,0,GW,GH);oc.save();oc.scale(1,.5);scene(oc,t);oc.restore();
+    var d=oc.getImageData(0,0,GW,GH).data,W=cv.width/GW,Hh=cv.height/GH,x,y;
+    mc.clearRect(0,0,cv.width,cv.height);
+    mc.font="bold "+(W/.6).toFixed(1)+"px monospace";mc.textAlign="center";mc.textBaseline="middle";
+    for(y=0;y<GH;y++)for(x=0;x<GW;x++){
+      var k=y*GW+x,p=k*4,a=d[p+3];if(a<110)continue;
+      var r=d[p],g=d[p+1],b=d[p+2],lum=(.3*r+.59*g+.11*b)/255;
+      var idx=clamp(Math.round(lum*8+1+nz[k]*1.6),1,9);
+      mc.fillStyle="rgb("+Math.min(255,r*1.3|0)+","+Math.min(255,g*1.3|0)+","+Math.min(255,b*1.3|0)+")";
+      mc.fillText(RAMP.charAt(idx),(x+.5)*W,(y+.5)*Hh);
+    }
+  }
+
+  // twinkling background characters
+  for(var s=0;s<45;s++){
+    var e=document.createElement("span");e.className="st";e.textContent="*+.:"[s%4];
+    e.style.left=Math.random()*98+"vw";e.style.top=Math.random()*98+"vh";
+    e.style.fontSize=(8+Math.random()*8)+"px";e.style.animationDelay=(Math.random()*3)+"s";
+    document.body.appendChild(e);
+  }
+
+  var ttl=document.getElementById("ttl"),note=document.getElementById("note");
+  note.textContent=NOTE;
+  var raf,start,last=0,textT,typer;
+  function showText(){
+    if(reduce){ttl.textContent=TITLE;note.classList.add("show");return;}
+    var i=0;typer=setInterval(function(){
+      ttl.textContent=TITLE.slice(0,++i);
+      if(i>=TITLE.length){clearInterval(typer);note.classList.add("show");}
+    },90);
+  }
+  function frame(now){
+    if(now-last>=33){last=now;render((now-start)/1000);}
+    raf=requestAnimationFrame(frame);
+  }
+  function play(){
+    cancelAnimationFrame(raf);clearTimeout(textT);clearInterval(typer);
+    ttl.textContent="";note.classList.remove("show");size();
+    if(reduce){render(99);showText();return;}
+    start=performance.now();raf=requestAnimationFrame(frame);textT=setTimeout(showText,4600);
+  }
+  document.getElementById("again").addEventListener("click",play);
+  var rt;window.addEventListener("resize",function(){clearTimeout(rt);rt=setTimeout(function(){size();if(reduce)render(99);},150);});
+  play();
+})();
+</script>
+</body>
+</html>
